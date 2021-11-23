@@ -9,7 +9,7 @@ const Home = () => {
     const [users, setUsers] = useState([])
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
-    const url = 'http://localhost:5000/user'
+    const url = 'https://ancient-wave-86522.herokuapp.com/user'
     const onSubmit = data => {
         function validateEmail(email) {
             const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -21,7 +21,7 @@ const Home = () => {
                     if (res.data.insertedId) {
                         reset()
                         swal("Good job!", "Successfully Add a User!", "success");
-                        axios.get('http://localhost:5000/user')
+                        axios.get('https://ancient-wave-86522.herokuapp.com/user')
                             .then(res => {
                                 setUsers(res.data)
                             })
@@ -38,7 +38,7 @@ const Home = () => {
     };
 
     useEffect(() => {
-        axios.get('http://localhost:5000/user')
+        axios.get('https://ancient-wave-86522.herokuapp.com/user')
             .then(res => {
                 setUsers(res.data)
             })
@@ -53,7 +53,7 @@ const Home = () => {
             dangerMode: true,
         })
             .then(() => {
-                axios.delete(`http://localhost:5000/user/${id}`)
+                axios.delete(`https://ancient-wave-86522.herokuapp.com/user/${id}`)
                     .then(res => {
                         if (res.data.deletedCount > 0) {
                             swal("Good job!", "deleted successfully!", "success");
