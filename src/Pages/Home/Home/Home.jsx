@@ -11,20 +11,30 @@ const Home = () => {
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
     const url = 'http://localhost:5000/user'
     const onSubmit = data => {
-        axios.post(url, data)
-            .then((res) => {
-                if (res.data.insertedId) {
-                    reset()
-                    swal("Good job!", "deleted successfully!", "success");
-                    axios.get('http://localhost:5000/user')
-                        .then(res => {
-                            setUsers(res.data)
-                        })
-                }
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+        function validateEmail(email) {
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(email);
+        }
+        if (validateEmail(data.EmailID)) {
+            axios.post(url, data)
+                .then((res) => {
+                    if (res.data.insertedId) {
+                        reset()
+                        swal("Good job!", "Successfully Add a User!", "success");
+                        axios.get('http://localhost:5000/user')
+                            .then(res => {
+                                setUsers(res.data)
+                            })
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else {
+            swal("Oh Shit!", "Enter a valid email address!", "warning");
+            return 
+        }
+
     };
 
     useEffect(() => {
@@ -55,45 +65,12 @@ const Home = () => {
     }
 
     const inputStyle = "mt-1 focus:border-indigo-500 block w-full sm:text-sm border-gray-300   flex-col border my-5 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-pink-400 focus:ring-1"
+
     return (
         <>
 
-            <div className="container mx-auto">
-                <div className="md:grid md:grid-cols-3 md:gap-6">
 
-                    <div className="mt-5 md:mt-0 md:col-span-3">
-                        <form onSubmit={handleSubmit(onSubmit)} className="flex justify-center flex-col">
-
-                            <div className="gap-6">
-                                <input {...register("FirstName", { required: true })} className=" my-5 p-3 rounded-lg shadow-lg focus:outline-none focus:ring-pink-400 focus:ring-4" placeholder="First Name" />
-                                {errors.FirstName?.type === 'required' && "FirstName is required"}
-
-                                <input {...register("LastName", { required: true })} className=" my-5 p-3 rounded-lg shadow-lg focus:outline-none focus:ring-pink-400 focus:ring-4" placeholder="Last Name" />
-                                {errors.LastName?.type === 'required' && "LastName is required"}
-                            </div>
-
-                            <input {...register("BirthDate", { required: true })} className="w-3/6 mx-auto my-5 p-3 rounded-lg shadow-lg focus:outline-none focus:ring-pink-400 focus:ring-4" placeholder="Date of Birth" type='date' />
-                            {errors.BirthDate?.type === 'required' && "BirthDate is required"}
-
-                            <input {...register("EmailID", { required: true })} className="w-3/6 mx-auto my-5 p-3 rounded-lg shadow-lg focus:outline-none focus:ring-pink-400 focus:ring-4" placeholder="Email" />
-                            {errors.EmailID?.type === 'required' && "EmailID is required"}
-
-
-
-
-                            <input {...register("ContactNumber", { required: true })} className="w-3/6 mx-auto my-5 p-3 rounded-lg shadow-lg focus:outline-none focus:ring-pink-400 focus:ring-4" placeholder="Contact Number" type="number" />
-
-
-
-                            <input {...register("Address", { required: true })} className="w-3/6 mx-auto my-5 p-3 rounded-lg shadow-lg focus:outline-none focus:ring-pink-400 focus:ring-4" placeholder="Address" type="text" />
-
-                            {errors.Address && <span>This field is required</span>}
-
-                            <input type="submit" className="btn " />
-                        </form>
-                    </div>
-                </div>
-            </div>
+            <div className="btn  flex justify-center"><h1 className="py-4 text-2xl font-bold">Register A User</h1></div>
 
 
 
@@ -103,9 +80,9 @@ const Home = () => {
 
             <div className="mt-10 sm:mt-0 container mx-auto">
                 <div className="md:grid md:grid-cols-2 md:gap-6">
-                    
+
                     <div className="mt-5 md:mt-0 md:col-span-2">
-                        <form>
+                        <form onSubmit={handleSubmit(onSubmit)}>
                             <div className="shadow overflow-hidden sm:rounded-md">
                                 <div className="px-4 py-5 bg-white sm:p-6">
                                     <div className="grid grid-cols-6 gap-6">
@@ -114,12 +91,13 @@ const Home = () => {
                                                 First name
                                             </label>
                                             <input
-                                                type="text"
-                                                name="first-name"
-                                                id="first-name"
+                                                {...register("FirstName", { required: true, minLength: 2 })}
                                                 autoComplete="given-name"
                                                 className={inputStyle}
                                             />
+                                            {errors.FirstName?.type === 'minLength' && errorMessage("minLength is 2")}
+                                            {errors.FirstName?.type === 'required' && errorMessage("FirstName is required")}
+
                                         </div>
 
                                         <div className="col-span-6 sm:col-span-3">
@@ -127,12 +105,12 @@ const Home = () => {
                                                 Last name
                                             </label>
                                             <input
-                                                type="text"
-                                                name="last-name"
-                                                id="last-name"
+                                                {...register("LastName", { required: true, minLength: 2 })}
                                                 autoComplete="family-name"
                                                 className={inputStyle}
                                             />
+                                            {errors.LastName?.type === 'required' && errorMessage("LastName is required")}
+                                            {errors.LastName?.type === 'minLength' && errorMessage("minLength is 2")}
                                         </div>
 
                                         <div className="col-span-6 sm:col-span-4">
@@ -140,12 +118,11 @@ const Home = () => {
                                                 Email address
                                             </label>
                                             <input
-                                                type="text"
-                                                name="email-address"
-                                                id="email-address"
-                                                autoComplete="email"
+                                                type="email"
+                                                {...register("EmailID", { required: true })}
                                                 className={inputStyle}
                                             />
+                                            {errors.EmailID?.type === 'required' && "EmailID is required"}
                                         </div>
 
                                         <div className="col-span-6 sm:col-span-6 lg:col-span-2">
@@ -154,26 +131,25 @@ const Home = () => {
                                             </label>
                                             <input
                                                 type="date"
-                                                name="city"
-                                                id="city"
+                                                {...register("BirthDate", { required: true })}
                                                 autoComplete="address-level2"
-                                                className="mt-1 focus:border-indigo-500 block w-full sm:text-sm border-gray-300   flex-col border my-5  rounded-lg shadow-sm focus:outline-none focus:ring-pink-400 focus:ring-1"
+                                                className="mt-1 focus:border-indigo-500 p-3 w-full sm:text-sm border-gray-300   flex border my-5  rounded-lg shadow-sm focus:outline-none focus:ring-pink-400 focus:ring-1"
                                             />
+                                            {errors.BirthDate?.type === 'required' && "BirthDate is required"}
                                         </div>
 
-                                        
+
 
                                         <div className="col-span-6">
                                             <label htmlFor="street-address" className="block text-sm font-medium text-gray-700">
                                                 Street address
                                             </label>
                                             <input
-                                                type="text"
-                                                name="street-address"
-                                                id="street-address"
+                                                {...register("Address", { required: true })}
                                                 autoComplete="street-address"
                                                 className={inputStyle}
                                             />
+                                            {errors.Address && <span>This field is required</span>}
                                         </div>
 
                                         <div className="col-span-6 sm:col-span-6 lg:col-span-2">
@@ -181,38 +157,35 @@ const Home = () => {
                                                 City
                                             </label>
                                             <input
-                                                type="text"
-                                                name="city"
-                                                id="city"
+                                                {...register("City", { required: true })}
                                                 autoComplete="address-level2"
                                                 className={inputStyle}
                                             />
                                         </div>
 
-                                        <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                                            <label htmlFor="region" className="block text-sm font-medium text-gray-700">
-                                                State / Province
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="region"
-                                                id="region"
-                                                autoComplete="address-level1"
-                                                className={inputStyle}
-                                            />
-                                        </div>
+
 
                                         <div className="col-span-6 sm:col-span-3 lg:col-span-2">
                                             <label htmlFor="postal-code" className="block text-sm font-medium text-gray-700">
                                                 ZIP / Postal code
                                             </label>
                                             <input
-                                                type="text"
-                                                name="postal-code"
-                                                id="postal-code"
+                                                {...register("ZipCode", { required: true })}
                                                 autoComplete="postal-code"
                                                 className={inputStyle}
                                             />
+                                        </div>
+                                        <div className="col-span-6 sm:col-span-3 lg:col-span-2">
+                                            <label htmlFor="Phone number" className="block text-sm font-medium text-gray-700">
+                                                Mobile Number
+                                            </label>
+                                            <input
+                                                type="number"
+                                                {...register("ContactNumber", { required: true,minLength:10 })}
+                                                autoComplete="phone number"
+                                                className={inputStyle}
+                                            />
+                                            {errors.ContactNumber?.type === 'minLength' && errorMessage("minimum used 10th number")}
                                         </div>
                                     </div>
                                 </div>
@@ -235,6 +208,7 @@ const Home = () => {
 
 
 
+            <div className="btn flex my-10 justify-center"><h1 className="py-3 text-xl font-bold">All Users</h1></div>
 
             <div className="flex flex-col m-10">
                 <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -286,19 +260,19 @@ const Home = () => {
                                                         <img className="h-10 w-10 rounded-full" src={user.Image} alt="" />
                                                     </div>
                                                     <div className="ml-4">
-                                                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                                        <div className="text-sm text-gray-500">{user.Title}</div>
+                                                        <div className="text-sm font-medium text-gray-900">{user.FirstName}{" "}{user.LastName}</div>
+                                                        <div className="text-sm text-gray-500">{user.EmailID}</div>
                                                     </div>
                                                 </div>
                                             </td>
 
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                    {user.btnColor}
+                                                    {user.BirthDate}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.Price}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.Price}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.ContactNumber}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.Address}-{user.ZipCode}{" "}{user.City}</td>
                                             <td className="px-6 py-4 whitespace-nowrap flex justify-center items-center">
 
 
@@ -335,3 +309,13 @@ const Home = () => {
 };
 
 export default Home;
+
+
+
+const errorMessage = (params) => {
+    return (
+        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded bg-red-100 text-red-800">
+            {params}
+        </span>
+    )
+}
