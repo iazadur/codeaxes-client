@@ -1,0 +1,6 @@
+.btn {
+    color: white;
+    background: linear-gradient(120deg, #FF8CAB ,#7366FF);
+    padding: 10px 15px;
+    border-radius: 4px;
+}
